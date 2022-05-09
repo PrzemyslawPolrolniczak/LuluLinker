@@ -1,26 +1,32 @@
 <template>
-  <div class="container" v-bind:class="{ main: props.isMain }">
-    <div class="header" v-bind:class="{ active: isActive || isMain }">
+  <div class="container" v-bind:class="{ disabled: isDisabled }">
+    <div class="header" v-bind:class="{ active: isActive }">
       <h1>{{ props.title }}</h1>
     </div>
-    <div class="content">
-      <!-- <span>Last built: 11min ago</span> -->
-      <!-- <p>Shared components library</p> -->
-      <img src="@/assets/unlinked.png" alt="unlinked">
-      <!-- <button class="action" @click="handleLink">Link</button> -->
+    <div @click="handleLink" class="content" v-bind:class="{ active: isActive, loading: isLoading }">
+      <img v-if="isActive" src="@/assets/linked.png">
+      <img v-else src="@/assets/unlinked.png">
+      <span>{{ status }}</span>
     </div>
+
+    <LoaderComponent v-if="isLoading" :color="isActive ? '#bbbbbb' : '#4479f1'" />
   </div>
 </template>
 
 <script lang="ts" setup>
+import LoaderComponent from '@/components/LoaderComponent.vue'
+
 const props = defineProps<{
   title: string,
   isActive?: boolean,
-  isMain?: boolean
+  isDisabled?: boolean,
+  isLoading?: boolean,
 }>()
 
+const status = props.isLoading ? "Loading..." : props.isActive ? 'Linked' : 'Unlinked'
+
 const handleLink = () => {
-  console.log('click');
+  if (props.isDisabled || props.isLoading) return;
 }
 </script>
 
@@ -29,53 +35,67 @@ const handleLink = () => {
   color: #5b6777;
   background-color: #FFF;
   border: 1px solid #ddd;
+  position: relative;
+
+  &.disabled {
+    opacity: 0.5;
+    pointer-events: none;
+  }
 
   .header {
-    padding: 1rem;
+    padding: 1rem 1rem 0.5rem;
     color: #f4f5f6;
     background-color: #aaa;
+
+    &.active {
+      background-color: #4479f1;
+    }
 
     h1 {
       font-size: 1.75rem;
       margin: 0;
     }
-
-    &.active {
-      background-color: #4479f1;
-      color: #333;
-    }
   }
 
   .content {
-    /* height: 200px; */
     display: flex;
     justify-content: center;
     align-items: center;
+    padding: 2rem;
+    flex-direction: column;
+    cursor: pointer;
 
     img {
       transition: 0.25s all;
-      cursor: pointer;
+    }
 
-      &:hover {
-        transform: scale(1.2) rotate(-20deg);
+    span {
+      margin-top: 1rem;
+    }
+
+    &:hover img {
+      transform: scale(1.2) rotate(-20deg);
+    }
+
+    &:active img {
+      transform: scale(1) rotate(-20deg);
+    }
+
+    &.active {
+      span {
+        color: #4479f1;
+        font-weight: 700;
       }
     }
-  }
-}
 
-.action {
-  background-color: #888;
-  border: none;
-  color: #fff;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
-  cursor: pointer;
-  border: 1px solid transparent;
+    &.loading {
+      cursor: not-allowed;
 
-  &:hover {
-    border: 1px solid #4479f1;
-    color: #4479f1;
-    background-color: #f2f6fc;
+      &:hover img,
+      &:active img {
+        transform: initial;
+      }
+    }
   }
 }
 </style>

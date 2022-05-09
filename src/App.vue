@@ -4,22 +4,14 @@
     <router-link to="/settings">Settings</router-link>
     <button @click="handleReadClick">Read FILE</button>
   </nav>
-  <div v-if="!isLoading">
-    <router-view />
-  </div>
-  <div v-else>L O A D I N G</div>
+  <router-view />
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue';
 import { invoke } from "@tauri-apps/api/tauri";
 
-const isLoading = ref(false);
-
 const handleReadClick = async () => {
-  isLoading.value = true;
   const res = await invoke('test_command', { luluFePath: '~/Projects/vuetest', targetPath: '~/Projects/vim-fundamentals' });
-  isLoading.value = false;
   console.log(res);
 }
 </script>
