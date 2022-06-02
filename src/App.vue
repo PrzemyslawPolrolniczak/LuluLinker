@@ -2,18 +2,19 @@
   <nav>
     <router-link to="/">Home</router-link> |
     <router-link to="/settings">Settings</router-link>
-    <button @click="handleReadClick">Read FILE</button>
   </nav>
   <router-view />
 </template>
 
 <script lang="ts" setup>
-import { invoke } from "@tauri-apps/api/tauri";
+import { onMounted } from "vue";
+import { useStore } from "vuex";
 
-const handleReadClick = async () => {
-  const res = await invoke('test_command', { luluFePath: '~/Projects/vuetest', targetPath: '~/Projects/vim-fundamentals' });
-  console.log(res);
-}
+const store = useStore();
+
+onMounted(() => {
+  store.dispatch("getStateFromConfig");
+});
 </script>
 
 <style lang="scss">
@@ -25,7 +26,7 @@ const handleReadClick = async () => {
 }
 
 body {
-  background-color: #F3F4F5;
+  background-color: #f3f4f5;
 }
 
 nav {
@@ -34,7 +35,7 @@ nav {
     color: #2c3e50;
 
     &.router-link-exact-active {
-      color: #42b983;
+      color: #4479f1;
     }
   }
 }

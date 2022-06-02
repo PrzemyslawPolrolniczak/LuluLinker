@@ -1,32 +1,61 @@
 <template>
   <div class="home">
-    <div class="lulu-fe">
-      <div class="top">
-        <h1>@lulu/fe</h1>
-        <button @click="setIsLuluFePushing" :disabled="isLuluFePushing">Push</button>
+    <div class="grid">
+      <div class="lulu-fe">
+        <div class="top">
+          <h1>@lulu/fe</h1>
+          <button @click="handleLuluFePush" :disabled="!!currentPushing">
+            Push
+          </button>
+        </div>
+        <span>Last push: {{ lastPushDate }}</span>
+        <LoaderComponent v-if="currentPushing === 'LULU_FE'" color="#4479f1" />
       </div>
-      <span>Last push: {{ lastPushDate }}</span>
-      <LoaderComponent v-if="isLuluFePushing" color="#4479f1" />
-    </div>
-    <div class="tile-grid">
-      <ProjectTile title="Project Wizard" isDisabled />
-      <ProjectTile title="Lulu Website" isActive />
-      <ProjectTile title="Lulu Direct UI" isLoading />
+
+      <ProjectTile
+        v-for="{ name, code } in projects"
+        :key="code"
+        :title="name"
+        :isDisabled="!!currentPushing"
+        :isActive="linkedProjects.some((project) => project === code)"
+        :isLoading="currentPushing === code"
+        :onClick="() => handleItemLink(code)"
+      />
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { computed } from 'vue';
-import { useStore } from 'vuex';
+import { computed } from "vue";
+import { useStore } from "vuex";
 
-import ProjectTile from '@/components/ProjectTile.vue';
-import LoaderComponent from '@/components/LoaderComponent.vue';
+import ProjectTile from "@/components/ProjectTile.vue";
+import LoaderComponent from "@/components/LoaderComponent.vue";
+
+const projects = [
+  { name: "Cover Tool", code: "COVER_TOOL" },
+  { name: "Project Wizard", code: "PROJECT_WIZARD" },
+  { name: "Lulu Website", code: "LULU_WEBSITE" },
+  { name: "Lulu Direct UI", code: "LULU_DIRECT_UI" },
+];
 
 const store = useStore();
-const isLuluFePushing = computed(() => store.state.isLuluFePushing)
+const currentPushing = computed(() => store.state.currentPushing);
 const lastPushDate = computed(() => store.state.lastPushDate);
-const setIsLuluFePushing = () => store.commit('setIsLuluFePushing');
+const linkedProjects = computed(() => store.state.linkedProjects);
+
+const handleLuluFePush = async () => {
+  store.dispatch("pushLuluFe");
+};
+
+const handleItemLink = async (code: string) => {
+  if (linkedProjects.value.some((project) => project === code)) {
+    store.dispatch("unlinkItem", code);
+    return;
+  }
+
+  store.dispatch("linkItem", code);
+};
 </script>
 
 <style lang="scss">
@@ -40,6 +69,7 @@ const setIsLuluFePushing = () => store.commit('setIsLuluFePushing');
   padding: 1rem 2rem 2rem;
   border: 1px solid #ddd;
   position: relative;
+  grid-column: 1 / 3;
 
   .top {
     display: flex;
@@ -71,7 +101,7 @@ const setIsLuluFePushing = () => store.commit('setIsLuluFePushing');
   }
 }
 
-.tile-grid {
+.grid {
   margin-top: 8px;
   display: grid;
   gap: 8px;

@@ -2,26 +2,42 @@
   <div class="settings">
     <h1>Settings</h1>
     <label>
-      <input type="checkbox" v-model="state.settings.isYalcAvailable">
+      <input
+        type="checkbox"
+        v-model="state.settings.isYalcAvailable"
+        disabled
+      />
       Use Yalc instead of npm link
     </label>
 
     <label>
       Project wizard path:
-      <br>
-      <input type="text" v-model="state.settings.paths.projectWizard" />
+      <br />
+      <input type="text" v-model="state.settings.paths.PROJECT_WIZARD" />
     </label>
 
     <label>
       @Lulu/fe path:
-      <br>
-      <input type="text" v-model="state.settings.paths.luluFe" />
+      <br />
+      <input type="text" v-model="state.settings.paths.LULU_FE" />
     </label>
 
     <label>
       Lulu website path:
-      <br>
-      <input type="text" v-model="state.settings.paths.luluWebsite" />
+      <br />
+      <input type="text" v-model="state.settings.paths.LULU_WEBSITE" />
+    </label>
+
+    <label>
+      Cover Tool path:
+      <br />
+      <input type="text" v-model="state.settings.paths.COVER_TOOL" />
+    </label>
+
+    <label>
+      Lulu Direct UI path:
+      <br />
+      <input type="text" v-model="state.settings.paths.LULU_DIRECT_UI" />
     </label>
 
     <button @click="handleSettingsSave">Save settings</button>
@@ -29,31 +45,42 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, reactive } from 'vue';
-import { readTextFile, Dir, writeFile } from '@tauri-apps/api/fs'
+import { onMounted, reactive } from "vue";
+import { readTextFile, Dir, writeFile } from "@tauri-apps/api/fs";
 
 const defaultSettings = {
-  isYalcAvailable: false,
+  isYalcAvailable: true,
   paths: {
-    projectWizard: '',
-    luluWebsite: '',
-    luluFe: ''
-  }
-}
+    PROJECT_WIZARD: "",
+    LULU_WEBSITE: "",
+    LULU_FE: "",
+    COVER_TOOL: "",
+    LULU_DIRECT_UI: "",
+  },
+  linkedProjects: [],
+};
 const state = reactive({
   settings: defaultSettings,
-})
+});
 
 onMounted(async () => {
-  const configFileContent = await readTextFile("lulu-helper-config.json", { dir: Dir.Download });
-  const parsedConfig = JSON.parse(configFileContent)
+  const configFileContent = await readTextFile("lulu-linker-config.json", {
+    dir: Dir.Config,
+  });
+  const parsedConfig = JSON.parse(configFileContent);
 
   state.settings = parsedConfig;
-})
+});
 
 const handleSettingsSave = async () => {
-  await writeFile({ path: 'lulu-helper-config.json', contents: JSON.stringify(state.settings) }, { dir: Dir.Download });
-}
+  await writeFile(
+    {
+      path: "lulu-linker-config.json",
+      contents: JSON.stringify(state.settings),
+    },
+    { dir: Dir.Config }
+  );
+};
 </script>
 
 <style lang="scss">
